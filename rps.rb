@@ -1,6 +1,7 @@
 # In our rock, paper, scissors a human player chooses a hand (r,p,s) and a computer player chooses a hand(rps).
 # Both players show their hand
 # Hands are compared and winner is declared
+#test
 
 class Player
   attr_accessor :hand
