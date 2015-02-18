@@ -36,6 +36,10 @@ class Board
     mark(position, 'O')
   end
 
+  def mark(position, marker)
+    @data[position] = marker
+  end
+
   def available_positions
     @data.select{ |_, marker| marker == " "}.keys
   end
@@ -44,8 +48,21 @@ class Board
     @data[position] == " "
   end
   # returns true if position is open
-  def mark(position, marker)
-    @data[position] = marker
+  def all_positions_full?
+    available_positions.empty?
+  end
+
+  def winner?
+    WINNING_LINES.each do |line|
+    return "Player" if @data.values_at(*line).count('X') == 3
+    return "Computer" if @data.values_at(*line).count('O') == 3
+    end
+    nil
+  end
+
+  def clear
+    @data = {}
+    (1..9).each { |position| @data[position] = " "}
   end
 end
 
@@ -67,21 +84,36 @@ class Game
   def initialize
     @human = Player.new('Tyler', 'X')
     @computer = Player.new('Siri', 'O')
-    @board = Board.new 
+    @board = Board.new
+    @current_player = @human 
   end
 
   def introduction
     puts "Welcome to tic tac toe #{@human.name}"
   end
 
-  def play_again?
-    puts "Would you like to play again y/n"
-    answer = gets.chomp.downcase
-    answer == 'y' ? true : false
+  def alternate_player
+    if @current_player == @human
+      @current_player = @computer
+    else
+      @current_player = @human
+    end
   end
 
-  def winner?
-  
+  def current_player_picks_position
+    if @current_player == @computer
+      @board.computer_pick_position
+    else
+      @board.human_pick_position
+    end
+  end
+
+  def display_game_result
+    if @board.winner?
+      @current_player == @computer ? (puts "#{@human.name} WON!") : (puts "#{@computer.name} WON!")
+    else
+      puts "It's a Cat's Game"
+    end
   end
 
   def run
@@ -89,13 +121,18 @@ class Game
       introduction
       @board.draw
       begin
-        #current player picks
-        #check for winner and break if there is 
-      end until winner? || all_positions_full?
-      display_winner
-      play_again?
-    end while play_again?
+        current_player_picks_position
+        @board.draw
+        alternate_player
+      end until @board.winner? || @board.all_positions_full?
+      display_game_result
+      @board.clear
+      puts "Would you like to play again? (y/n)"
+      answer = gets.chomp.downcase
+    end while answer == 'y'
   end
 end
+
+game = Game.new.run
 
 
